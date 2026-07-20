@@ -1,0 +1,30 @@
+[
+  {
+    "teamInfoId": 40,
+    "teamName": "FC Bayern München",
+    "shortName": "FCB",
+    "teamIconUrl": "https://i.imgur.com/example-fcb.png",
+    "points": 9,
+    "opponentGoals": 2,
+    "goals": 12,
+    "matches": 3,
+    "won": 3,
+    "lost": 0,
+    "draw": 0,
+    "goalDiff": 10
+  },
+  {
+    "teamInfoId": 81,
+    "teamName": "TSG 1899 Hoffenheim",
+    "shortName": "TSG",
+    "teamIconUrl": "https://i.imgur.com/example-tsg.png",
+    "points": 3,
+    "opponentGoals": 6,
+    "goals": 4,
+    "matches": 3,
+    "won": 1,
+    "lost": 2,
+    "draw": 0,
+    "goalDiff": -2
+  }
+]

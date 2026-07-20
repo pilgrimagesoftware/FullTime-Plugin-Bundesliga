@@ -1,0 +1,5 @@
+id = "bundesliga"
+version = "0.1.0"
+schema_version = "1.0"
+interface_version = "1.0"
+network_hosts = ["api.openligadb.de"]
