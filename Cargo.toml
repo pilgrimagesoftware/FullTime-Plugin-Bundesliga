@@ -16,10 +16,7 @@ exclude = [".github/*", ".gitignore"]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-# TEMPORARY: pin to the add-host-fetch-capability branch until
-# https://github.com/pilgrimagesoftware/fulltime-plugin-api/pull/7 merges and 0.2.0 is
-# released, then switch back to a crates.io version requirement (see that PR/issue #6).
-fulltime-plugin-api = { git = "https://github.com/pilgrimagesoftware/fulltime-plugin-api.git", branch = "add-host-fetch-capability" }
+fulltime-plugin-api = "0.1.1"
 openligadb = "0.0.9"
 serde = { version = "1.0", default-features = false, features = ["derive", "std"] }
 serde_json = { version = "1.0", default-features = false, features = ["std"] }

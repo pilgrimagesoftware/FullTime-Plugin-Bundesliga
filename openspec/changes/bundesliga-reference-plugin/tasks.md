@@ -25,9 +25,10 @@
   (`add-host-fetch-capability`), which adds `interface host { fetch: ... }` and
   `import host;` to `world plugin`. `transport::HostFetcher` (`wasm32`-only) now
   implements `Fetcher` by delegating to `fulltime_plugin_api::host_fetch`; native tests
-  keep using a fixture-backed `Fetcher`. Depends on a `git` dependency on that PR's branch
-  in `Cargo.toml` until it merges and `0.2.0` is released — see the `TEMPORARY` comment
-  there.
+  keep using a fixture-backed `Fetcher`. PR #7 merged and released as `fulltime-plugin-api`
+  `0.1.1` (not `0.2.0` — a squash-merge dropped the `feat!:` prefix, under-bumping the
+  version; see that crate's `RELEASING.md`). `Cargo.toml` now depends on
+  `fulltime-plugin-api = "0.1.1"` from crates.io, no longer the `git`/`TEMPORARY` pin.
 - [x] 2.3 Feed responses back into `openligadb`'s existing deserialization/model types
   (`transport::get_list` deserializes via `serde_json` directly into
   `openligadb::models::*`, since `openligadb::util` is a private module and its own

@@ -55,9 +55,11 @@ before any second plugin (EPL, national teams) is attempted.
   called from this crate (the single-arg form only resolves inside `fulltime-plugin-api`
   itself) — see that crate's `add-host-fetch-capability` change design.md if this ever
   needs revisiting after a `wit-bindgen`/`fulltime-plugin-api` upgrade.
-- `Cargo.toml` currently pins `fulltime-plugin-api` to a `git` dependency on that change's
-  branch (`TEMPORARY` comment there) until it's merged and released as `0.2.0` — switch
-  back to a version requirement once that happens.
+- `Cargo.toml` depends on `fulltime-plugin-api = "0.1.1"` from crates.io (the
+  `add-host-fetch-capability` change merged and released as `0.1.1`, not `0.2.0` as
+  originally planned — a squash-merge dropped the `feat!:` prefix, so `git-cliff`
+  under-bumped it; see `fulltime-plugin-api`'s `RELEASING.md` for the squash-merge subject
+  requirement this caused).
 - The plugin manifest declares `api.openligadb.de` as the sole network host and targets
   `interface_version = "2.0"`.
 - Actually cross-compiling this crate to `wasm32-wasip2` currently fails — not from
