@@ -10,6 +10,7 @@
 #![deny(unsafe_op_in_unsafe_fn)]
 #![forbid(unsafe_code)]
 
+mod component;
 pub mod mapping;
 pub mod provider;
 pub mod transport;

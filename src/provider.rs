@@ -1,12 +1,11 @@
 //! Implements `fulltime-plugin-api`'s five `data-provider` operations against the
 //! transport shim and mapping layer.
 //!
-//! **Not yet wired to an actual WASM component export.** `fulltime-plugin-api`'s `mod
-//! bindings` is private, so it doesn't re-export a `Guest` trait or `export!` macro this
-//! crate could hook into directly, and there is no host runtime yet
-//! (`Apps/rust`'s `plugin-host-runtime` change) to build or test a real component export
-//! against. These functions are the operations a future component-export shim will call
-//! into once that seam exists — see `AGENTS.md` ("Implementing the plugin").
+//! Takes a `&dyn Fetcher` parameter rather than reading a host capability directly, so
+//! these functions are exercised in `tests/provider.rs` against fixture data without a
+//! real component. `crate::component` wires them into the actual WASM component export
+//! (`fulltime_plugin_api::Guest`/`export!`), passing `transport::HostFetcher` in place of
+//! a fixture — see that module and `AGENTS.md` ("Implementing the plugin").
 
 use fulltime_plugin_api::{
     Competition, Fixture, FixtureStatus, NetworkFailure, ProviderError, SchemaMappingFailure,

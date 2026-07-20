@@ -2,8 +2,15 @@
 
 - [x] 1.1 Scaffold the WASM component crate (Cargo.toml targeting `wasm32-wasip2` or the
   Component Model target used by `fulltime-plugin-api`, license, CI). `crate-type =
-  ["cdylib", "rlib"]` set; actual `wasm32-wasip2` cross-compilation not yet attempted in
-  this environment — only native `cargo build`/`test`/`clippy`/`doc` verified so far.
+  ["cdylib", "rlib"]` set. `cargo check --target wasm32-wasip2` on this crate directly
+  fails — not from anything in this crate's own code, but because `openligadb`'s hard
+  `reqwest`/`tokio` dependency (its TLS stack, `aws-lc-sys`) can't cross-compile to
+  `wasm32-wasip2` in this environment (`clang` can't find `wasm32-wasi` libc headers for
+  `aws-lc-sys`'s C sources). Verified this crate's own WASM component code (the `Guest`
+  impl + `export!` call in `src/component.rs`) is correct by cross-compiling an isolated
+  scratch crate against `fulltime-plugin-api` alone (no `openligadb`) for
+  `wasm32-wasip2` — it built clean. See task 2.2's note; fixing `openligadb` to gate
+  `reqwest` behind an optional feature is out of scope for this repo.
 - [x] 1.2 Add dependencies on `openligadb` (pinned version) and `fulltime-plugin-api`
 
 ## 2. Transport Shim
@@ -11,12 +18,16 @@
 - [x] 2.1 Implement request construction matching `openligadb`'s existing HTTP calls
   (`src/transport.rs`: `leagues_url`/`matches_url`/`table_url`, matching the endpoint
   patterns each `openligadb` model's own `impl` builds internally)
-- [ ] 2.2 Route requests through the host `fetch` capability instead of a direct HTTP
-  client — **blocked**: `fulltime-plugin-api`'s WIT world (`wit/data-provider.wit`) only
-  `export`s `data-provider`; it defines no host `fetch` import yet (that's pending
-  `Apps/rust`'s `plugin-host-runtime` change). Implemented the seam this will plug into
-  instead: `transport::Fetcher`, a trait any transport (host import, or a fixture/HTTP
-  client for testing) implements. See `src/transport.rs` and `AGENTS.md`.
+- [x] 2.2 Route requests through the host `fetch` capability instead of a direct HTTP
+  client. Was blocked on `fulltime-plugin-api`'s WIT world defining no host `fetch`
+  import — unblocked by
+  [pilgrimagesoftware/fulltime-plugin-api#7](https://github.com/pilgrimagesoftware/fulltime-plugin-api/pull/7)
+  (`add-host-fetch-capability`), which adds `interface host { fetch: ... }` and
+  `import host;` to `world plugin`. `transport::HostFetcher` (`wasm32`-only) now
+  implements `Fetcher` by delegating to `fulltime_plugin_api::host_fetch`; native tests
+  keep using a fixture-backed `Fetcher`. Depends on a `git` dependency on that PR's branch
+  in `Cargo.toml` until it merges and `0.2.0` is released — see the `TEMPORARY` comment
+  there.
 - [x] 2.3 Feed responses back into `openligadb`'s existing deserialization/model types
   (`transport::get_list` deserializes via `serde_json` directly into
   `openligadb::models::*`, since `openligadb::util` is a private module and its own
@@ -40,15 +51,20 @@
 
 ## 4. Plugin Interface Implementation
 
-- [ ] 4.1 Implement the data-provider WIT interface (list-competitions, fetch-fixtures,
-  fetch-results, fetch-standings, fetch-metadata) against the shim and mapping layers —
-  **partially done, not component-wired**: `src/provider.rs` implements all five
-  operations as plain Rust functions with matching signatures/semantics, and
-  `tests/provider.rs` exercises them. Not yet wired to an actual WASM component export:
-  `fulltime-plugin-api`'s `mod bindings` is private, so it re-exports canonical types but
-  no `Guest` trait/`export!` macro a downstream plugin could hook into, and there's no
-  host runtime yet to build or test a real export against. See `src/provider.rs`'s module
-  doc for the follow-up needed once that seam exists.
+- [x] 4.1 Implement the data-provider WIT interface (list-competitions, fetch-fixtures,
+  fetch-results, fetch-standings, fetch-metadata) against the shim and mapping layers.
+  Was blocked on `fulltime-plugin-api` not re-exporting a `Guest` trait/`export!` macro —
+  unblocked by the same PR as 2.2. `src/component.rs` implements
+  `fulltime_plugin_api::Guest` (`wasm32`-only), delegating to `provider`'s functions with
+  `transport::HostFetcher` as the fetcher, and calls
+  `fulltime_plugin_api::export!(BundesligaPlugin with_types_in fulltime_plugin_api)` —
+  note the `with_types_in` form is required from a downstream crate (the single-arg form
+  only resolves inside `fulltime-plugin-api` itself), discovered and documented in that
+  PR's design.md. Verified via the same isolated scratch-crate cross-compile as task 1.1;
+  not yet verified building *this* crate to `wasm32-wasip2` end-to-end, blocked on
+  `openligadb`'s `reqwest`/`tokio` dependency (see task 1.1's note) — that's a separate,
+  unaddressed blocker in `Libs/openligadb/rust`, not in this repo or
+  `fulltime-plugin-api`.
 - [x] 4.2 Write the plugin manifest declaring the OpenLigaDB API host as the sole network
   capability and the targeted schema/interface versions (`manifest.toml`, validated
   against `fulltime_plugin_api::Manifest::parse` in `tests/manifest.rs`)

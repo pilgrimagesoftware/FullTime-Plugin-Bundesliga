@@ -46,7 +46,25 @@ before any second plugin (EPL, national teams) is attempted.
 - Map `openligadb`'s response types (`Team`, `Match`, `TableTeam`) to the canonical schema
   (`Team`, `Fixture`, `Standings`) in `src/mapping.rs`; do not reimplement HTTP fetch logic that
   already exists in `openligadb`.
-- The plugin manifest declares `api.openligadb.de` as the sole network host.
+- `src/provider.rs` implements the five operations as plain functions taking `&dyn
+  transport::Fetcher` (testable natively against fixtures). `src/component.rs`
+  (`wasm32`-only) wires them into the real component export via
+  `fulltime_plugin_api::Guest`/`export!`, using `transport::HostFetcher` (also
+  `wasm32`-only) as the fetcher, which delegates to `fulltime_plugin_api::host_fetch`.
+- `fulltime_plugin_api::export!` needs the `with_types_in fulltime_plugin_api` form when
+  called from this crate (the single-arg form only resolves inside `fulltime-plugin-api`
+  itself) — see that crate's `add-host-fetch-capability` change design.md if this ever
+  needs revisiting after a `wit-bindgen`/`fulltime-plugin-api` upgrade.
+- `Cargo.toml` currently pins `fulltime-plugin-api` to a `git` dependency on that change's
+  branch (`TEMPORARY` comment there) until it's merged and released as `0.2.0` — switch
+  back to a version requirement once that happens.
+- The plugin manifest declares `api.openligadb.de` as the sole network host and targets
+  `interface_version = "2.0"`.
+- Actually cross-compiling this crate to `wasm32-wasip2` currently fails — not from
+  anything in this crate, but because `openligadb`'s `reqwest`/`tokio` dependency can't
+  cross-compile to `wasm32-wasip2` in this environment. Fixing that means gating
+  `openligadb`'s networking behind an optional Cargo feature in `Libs/openligadb/rust`,
+  which is out of scope for this repo.
 - See `openspec/changes/bundesliga-reference-plugin/tasks.md` for the current task breakdown.
 
 ## Running Checks Locally

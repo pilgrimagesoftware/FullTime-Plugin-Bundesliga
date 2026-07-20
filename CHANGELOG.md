@@ -6,6 +6,10 @@
   URL builders), schema mapping from `openligadb` types to the canonical
   `fulltime-plugin-api` schema, plain-function data-provider operations, and the plugin
   manifest
+- Wire the `data-provider` interface up to a real WASM component export
+  (`fulltime_plugin_api::Guest`/`export!`) and route requests through the host `fetch`
+  capability via `fulltime_plugin_api::host_fetch`, now that
+  `fulltime-plugin-api`'s `add-host-fetch-capability` change defines both
 
 ### Documentation
 
