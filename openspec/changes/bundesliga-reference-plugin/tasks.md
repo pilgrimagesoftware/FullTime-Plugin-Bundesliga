@@ -2,15 +2,13 @@
 
 - [x] 1.1 Scaffold the WASM component crate (Cargo.toml targeting `wasm32-wasip2` or the
   Component Model target used by `fulltime-plugin-api`, license, CI). `crate-type =
-  ["cdylib", "rlib"]` set. `cargo check --target wasm32-wasip2` on this crate directly
-  fails — not from anything in this crate's own code, but because `openligadb`'s hard
-  `reqwest`/`tokio` dependency (its TLS stack, `aws-lc-sys`) can't cross-compile to
-  `wasm32-wasip2` in this environment (`clang` can't find `wasm32-wasi` libc headers for
-  `aws-lc-sys`'s C sources). Verified this crate's own WASM component code (the `Guest`
-  impl + `export!` call in `src/component.rs`) is correct by cross-compiling an isolated
-  scratch crate against `fulltime-plugin-api` alone (no `openligadb`) for
-  `wasm32-wasip2` — it built clean. See task 2.2's note; fixing `openligadb` to gate
-  `reqwest` behind an optional feature is out of scope for this repo.
+  ["cdylib", "rlib"]` set. `cargo build --target wasm32-wasip2` now succeeds end-to-end
+  and produces `target/wasm32-wasip2/debug/fulltime_plugin_bundesliga.wasm` — unblocked by
+  `openligadb` 0.0.13's `http-client` Cargo feature
+  ([pilgrimagesoftware/openligadb.rs#33](https://github.com/pilgrimagesoftware/openligadb.rs/pull/33),
+  `gate-wasm-networking`), which gates `reqwest`/`async-trait`/`url` behind an
+  optional, default-on feature. `Cargo.toml` now depends on `openligadb = { version =
+  "0.0.13", default-features = false }`.
 - [x] 1.2 Add dependencies on `openligadb` (pinned version) and `fulltime-plugin-api`
 
 ## 2. Transport Shim
@@ -61,11 +59,10 @@
   `fulltime_plugin_api::export!(BundesligaPlugin with_types_in fulltime_plugin_api)` —
   note the `with_types_in` form is required from a downstream crate (the single-arg form
   only resolves inside `fulltime-plugin-api` itself), discovered and documented in that
-  PR's design.md. Verified via the same isolated scratch-crate cross-compile as task 1.1;
-  not yet verified building *this* crate to `wasm32-wasip2` end-to-end, blocked on
-  `openligadb`'s `reqwest`/`tokio` dependency (see task 1.1's note) — that's a separate,
-  unaddressed blocker in `Libs/openligadb/rust`, not in this repo or
-  `fulltime-plugin-api`.
+  PR's design.md. Now verified building *this* crate to `wasm32-wasip2` end-to-end (see
+  task 1.1) — `cargo build --target wasm32-wasip2` produces a real `.wasm` component,
+  not just the isolated scratch-crate cross-compile used before `openligadb`'s
+  `http-client` feature-gate landed.
 - [x] 4.2 Write the plugin manifest declaring the OpenLigaDB API host as the sole network
   capability and the targeted schema/interface versions (`manifest.toml`, validated
   against `fulltime_plugin_api::Manifest::parse` in `tests/manifest.rs`)
@@ -74,7 +71,8 @@
 
 - [ ] 5.1 Run this plugin's path and a direct `openligadb` call side by side for a sample
   of seasons/matchdays, diffing output against the canonical schema — not started; needs
-  live network access and is more meaningful once 4.1's component wiring exists
+  live network access. 4.1's component wiring and the `wasm32-wasip2` build now both
+  exist, so this is unblocked whenever live-network verification is wanted.
 - [ ] 5.2 Document any fields the canonical schema doesn't carry that `openligadb`
   provides, and confirm with the `fulltime-plugin-api` change owner whether the schema
   needs to account for them — not started. One gap already visible from mapping work:

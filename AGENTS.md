@@ -62,11 +62,13 @@ before any second plugin (EPL, national teams) is attempted.
   requirement this caused).
 - The plugin manifest declares `api.openligadb.de` as the sole network host and targets
   `interface_version = "2.0"`.
-- Actually cross-compiling this crate to `wasm32-wasip2` currently fails — not from
-  anything in this crate, but because `openligadb`'s `reqwest`/`tokio` dependency can't
-  cross-compile to `wasm32-wasip2` in this environment. Fixing that means gating
-  `openligadb`'s networking behind an optional Cargo feature in `Libs/openligadb/rust`,
-  which is out of scope for this repo.
+- `Cargo.toml` depends on `openligadb = { version = "0.0.13", default-features = false }`.
+  `openligadb` 0.0.13 added an `http-client` Cargo feature (default-on) gating
+  `reqwest`/`async-trait`/`url`; this plugin needs none of that (it deserializes via
+  `serde_json` directly into `openligadb::models::*`, never calling `openligadb`'s own
+  fetch methods), so disabling it removes the dependency that used to block cross-compiling
+  to `wasm32-wasip2`. `cargo build --target wasm32-wasip2` now succeeds and produces a real
+  `.wasm` component.
 - See `openspec/changes/bundesliga-reference-plugin/tasks.md` for the current task breakdown.
 
 ## Running Checks Locally
@@ -76,4 +78,5 @@ cargo build
 cargo test --all-features --workspace
 cargo clippy --all-targets --all-features -- -D warnings
 cargo fmt --check
+cargo build --target wasm32-wasip2
 ```
