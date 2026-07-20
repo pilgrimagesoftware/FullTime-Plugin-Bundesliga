@@ -1,0 +1,15 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [develop]
+
+jobs:
+  ci:
+    uses: pilgrimagesoftware/github-actions/.github/workflows/rust-ci.yaml@master
+    with:
+      test-args: "--all-features --workspace"
+      no-default-features-test: true
+      doc-test: true
+      doc-build: true

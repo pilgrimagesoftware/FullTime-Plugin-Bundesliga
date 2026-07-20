@@ -1,0 +1,11 @@
+name: Prepare Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    uses: pilgrimagesoftware/github-actions/.github/workflows/rust-prepare-release.yaml@master
+    with:
+      project-number: 9
+    secrets: inherit
