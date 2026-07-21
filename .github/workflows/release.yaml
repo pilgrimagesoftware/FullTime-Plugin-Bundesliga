@@ -11,6 +11,10 @@ on:
         required: true
         type: string
 
+permissions:
+  contents: write
+  id-token: write
+
 jobs:
   release:
     uses: pilgrimagesoftware/github-actions/.github/workflows/rust-release.yaml@master

@@ -3,6 +3,10 @@ name: Prepare Release
 on:
   workflow_dispatch:
 
+permissions:
+  contents: write
+  pull-requests: write
+
 jobs:
   prepare:
     uses: pilgrimagesoftware/github-actions/.github/workflows/rust-prepare-release.yaml@master
