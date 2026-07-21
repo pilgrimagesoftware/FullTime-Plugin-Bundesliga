@@ -69,12 +69,22 @@
 
 ## 5. Validation
 
-- [ ] 5.1 Run this plugin's path and a direct `openligadb` call side by side for a sample
-  of seasons/matchdays, diffing output against the canonical schema — not started; needs
-  live network access. 4.1's component wiring and the `wasm32-wasip2` build now both
-  exist, so this is unblocked whenever live-network verification is wanted.
-- [ ] 5.2 Document any fields the canonical schema doesn't carry that `openligadb`
+- [x] 5.1 Run this plugin's path and a direct `openligadb` call side by side for a sample
+  of seasons/matchdays, diffing output against the canonical schema
+  (`tests/live_validation.rs`, `#[ignore]`d by default — run with `cargo test --test
+  live_validation -- --ignored`). For `bl1`/2023: `provider::list_competitions`,
+  `fetch_fixtures`, and `fetch_standings` were each run against the live API and compared
+  against `openligadb`'s own `League::list`/`Match::by_league`/`TableTeam::get_bl_table`
+  (dev-dependency, `http-client` feature enabled) mapped through the same
+  `mapping` functions. All three passed: the transport shim reproduces `openligadb`'s
+  own request/response handling exactly for every field the canonical schema carries.
+- [x] 5.2 Document any fields the canonical schema doesn't carry that `openligadb`
   provides, and confirm with the `fulltime-plugin-api` change owner whether the schema
-  needs to account for them — not started. One gap already visible from mapping work:
-  `openligadb::models::team::Team`/`TableTeam` carry `icon_url` (team logo), which the
-  canonical `Team` record has no field for.
+  needs to account for them. Documented in `design.md` ("Fields `openligadb` Provides That
+  the Canonical Schema Doesn't Carry"): `Team`/`TableTeam::icon_url`, `Team::group`,
+  `League::sport`, `Match`'s league-identifying fields, `Match::last_update`, non-final
+  `Match::results` entries, `Match::goals`, and `Location::city`. Filed
+  [pilgrimagesoftware/fulltime-plugin-api#10](https://github.com/pilgrimagesoftware/fulltime-plugin-api/issues/10)
+  to track the schema-owner decision on team logos and goal-scorer events; none of these
+  gaps block this change since every field the canonical schema currently defines is
+  populated and verified.

@@ -24,3 +24,6 @@ thiserror = { version = "2.0", default-features = false, features = ["std"] }
 
 [dev-dependencies]
 proptest = "1"
+reqwest = { version = "0.13", default-features = false, features = ["blocking"] }
+openligadb = { version = "0.0.13", default-features = false, features = ["http-client"] }
+tokio = { version = "1", default-features = false, features = ["rt", "rt-multi-thread"] }

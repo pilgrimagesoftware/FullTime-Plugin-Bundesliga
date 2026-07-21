@@ -70,3 +70,35 @@ coordinated separately.
 - Should this plugin vendor a pinned `openligadb` version, or track its latest release?
   Leaning toward a pinned version bumped deliberately, consistent with keeping the
   diffing-against-direct-integration validation meaningful.
+
+## Fields `openligadb` Provides That the Canonical Schema Doesn't Carry
+
+Task 5.2's side-by-side validation (`tests/live_validation.rs`, run against the live API for
+`bl1`/2023) confirmed output equivalence for every field the canonical schema does carry. The
+following upstream fields have no canonical-schema home today, so they're dropped by
+`src/mapping.rs` rather than mismapped:
+
+- **`Team`/`TableTeam::icon_url`** (`teamIconUrl`) — a team logo URL. Present on both match
+  team payloads and table rows.
+- **`Team::group`** (`teamGroupName`) — an upstream grouping label for the team, distinct
+  from `Match::group` (matchday/round grouping, which the canonical `Fixture::group` does
+  carry).
+- **`League::sport`** — the sport this league belongs to (always football for this plugin,
+  but not implied by the canonical `Competition` type itself).
+- **`Match`'s league-identifying fields** (`league_id`, `league_name`, `league_season`,
+  `league_shortcut`, `time_zone`) — redundant with `Fixture::competition_id` for this
+  plugin's single-league scope, but would matter for a multi-league canonical consumer.
+- **`Match::last_update`** — no canonical "last modified" timestamp exists on `Fixture`.
+- **`Match::results`'s non-final entries** (halftime, etc., `type_id != 2`) — only the final
+  score maps to `Fixture::score`; intermediate results are dropped entirely.
+- **`Match::goals`** (individual goal events: scorer, minute, penalty/own-goal flags) — no
+  equivalent field exists on the canonical `Fixture`.
+- **`Location::city`** — only `Location::stadium` maps to `Fixture::venue`; the city isn't
+  carried.
+
+None of these gaps block this change: every canonical-schema field is fully populated and
+verified equivalent to `openligadb`'s direct output. Whether `fulltime-plugin-api`'s schema
+should grow fields for any of these (team logos and goal-scorer events are the two most
+likely candidates for a future UI need) is a decision for that repo's change owner, not this
+plugin — tracked in
+[pilgrimagesoftware/fulltime-plugin-api#10](https://github.com/pilgrimagesoftware/fulltime-plugin-api/issues/10).
