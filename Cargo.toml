@@ -16,7 +16,7 @@ exclude = [".github/*", ".gitignore"]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-fulltime-plugin-api = "0.1.1"
+fulltime-plugin-api = "0.2.0"
 openligadb = { version = "0.0.13", default-features = false }
 serde = { version = "1.0", default-features = false, features = ["derive", "std"] }
 serde_json = { version = "1.0", default-features = false, features = ["std"] }
