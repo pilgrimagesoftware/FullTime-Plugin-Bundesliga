@@ -1,0 +1,22 @@
+[
+  {
+    "leagueId": 4741,
+    "leagueName": "1. Fußball-Bundesliga 2024/2025",
+    "leagueShortcut": "bl1",
+    "leagueSeason": "2024",
+    "sport": {
+      "sportId": 1,
+      "sportName": "Fußball"
+    }
+  },
+  {
+    "leagueId": 4442,
+    "leagueName": "2. Fußball-Bundesliga 2024/2025",
+    "leagueShortcut": "bl2",
+    "leagueSeason": "2024",
+    "sport": {
+      "sportId": 1,
+      "sportName": "Fußball"
+    }
+  }
+]
